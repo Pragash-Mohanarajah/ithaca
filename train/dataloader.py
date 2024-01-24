@@ -26,7 +26,7 @@ from ithaca.util.text import random_word_swap
 from ithaca.util.text import text_to_idx
 from ithaca.util.text import text_to_word_idx
 import numpy as np
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 
 
 def generate_sample(config, alphabet, region_map, sample, mode='train'):

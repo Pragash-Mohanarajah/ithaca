@@ -42,7 +42,7 @@ from jaxline import platform
 from jaxline import utils as jl_utils
 import numpy as np
 import optax
-import tensorflow_datasets.public_api as tfds
+import tensorflow_datasets as tfds
 
 FLAGS = flags.FLAGS
 

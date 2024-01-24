@@ -13,7 +13,7 @@
 # limitations under the License.
 """Loss functions."""
 import chex
-from flax.deprecated import nn
+from flax import linen as nn
 import jax
 import jax.numpy as jnp
 
