@@ -47,10 +47,10 @@ class Alphabet:
 
     # Define wordlist mapping
     idx2word = [self.pad, self.sos, self.unk]
-    with open(wordlist_file.name, encoding='cp437') as wordlist:
+    if wordlist_file:
       idx2word += [
           w_c.split(';')[0]
-          for w_c in wordlist.read().strip().split('\n')[:wordlist_size]
+          for w_c in wordlist_file.read().strip().split('\n')[:wordlist_size]
       ]
     self.idx2word = np.array(idx2word)
     self.word2idx = {self.idx2word[i]: i for i in range(len(self.idx2word))}
