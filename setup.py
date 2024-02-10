@@ -38,7 +38,7 @@ setuptools.setup(
     extras_require={
         'train': [
             'optax',
-            'jaxline==0.0.5',
+            'jaxline>=0.0.5',
             'tensorflow-datasets',
         ]
     },

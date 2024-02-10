@@ -240,7 +240,11 @@ def loader_tf(batch_size,
               mode='train'):
   """TF dataloader."""
   # Load dataset
-  dataset_tmp = {int(d['id']): d for d in json.load(dataset_file)}
+  # dataset_tmp = {int(d['id']): d for d in json.load(dataset_file)}
+  dataset_tmp = {}
+  for d in json.load(dataset_file):
+    dataset_tmp.setdefault(int(d['id']), d)
+
   logging.info('Loaded dataset inscriptions: %d.', len(dataset_tmp))
 
   # Check if white_list enabled
