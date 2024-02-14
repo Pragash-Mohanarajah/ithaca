@@ -43,6 +43,7 @@ from jaxline import utils as jl_utils
 import numpy as np
 import optax
 import tensorflow_datasets as tfds
+import tensorflow as tf
 
 FLAGS = flags.FLAGS
 
@@ -87,7 +88,7 @@ class Experiment(experiment.AbstractExperiment):
         max_lr=self.config.optimizer.kwargs.learning_rate,
         warmup_steps=self.config.optimizer.warmup)
 
-    self._opt_init, self._opt_update = self.optimizer()
+    self._opt_init, self._opt_update = self._optimizer()
 
     if 'use_jit' in self.config.evaluation and self.config.evaluation.use_jit:
       self._eval_batch = jax.jit(self._eval_batch)
@@ -95,19 +96,19 @@ class Experiment(experiment.AbstractExperiment):
     # Create alphabet
     alphabet_kwargs = dict(self.config.alphabet)
     wordlist_path = alphabet_kwargs.pop('wordlist_path')
-    with open(wordlist_path, 'r') as f:
+    with open(wordlist_path, 'r', encoding='utf-8') as f:
       self._alphabet = GreekAlphabet(wordlist_file=f, **alphabet_kwargs)
 
     # Create region mapping
     self._region_map = {'main': None, 'sub': None}
     if self.config.dataset.region_main_path:
-      with open(self.config.dataset.region_main_path, 'r') as f:
+      with open(self.config.dataset.region_main_path, 'r', encoding='utf-8') as f:
         self._region_map['main'] = load_region_maps(f)
     if self.config.dataset.region_sub_path:
-      with open(self.config.dataset.region_sub_path, 'r') as f:
+      with open(self.config.dataset.region_sub_path, 'r', encoding='utf-8') as f:
         self._region_map['sub'] = load_region_maps(f)
 
-  def optimizer(self):
+  def _optimizer(self):
     config_opt = self.config.optimizer
 
     kwargs = config_opt.kwargs.to_dict()
@@ -138,6 +139,10 @@ class Experiment(experiment.AbstractExperiment):
     (self._params, self._opt_state, scalars) = (
         self._update_func(self._params, self._opt_state, global_step, batch,
                           rng))
+    
+    # updater = jax.pmap(self._update_func, axis_name='i', donate_argnums=(0, 1))
+    # (self._params, self._opt_state, scalars) = (
+    #   updater(self._params, self._opt_state, global_step, batch, rng))
 
     scalars = jl_utils.get_first(scalars)
     return scalars
@@ -183,7 +188,7 @@ class Experiment(experiment.AbstractExperiment):
           f'num devices {num_devices}')
 
     config_dataset = self.config.dataset
-    with open(config_dataset.dataset_path) as dataset_file:
+    with open(config_dataset.dataset_path, encoding='utf-8') as dataset_file:
       ds = dataloader.loader_tf(
           per_device_batch_size,
           config_dataset,
@@ -401,7 +406,7 @@ class Experiment(experiment.AbstractExperiment):
     best_score = None
     best_step = None
     if os.path.exists(score_path):
-      with open(score_path, 'r') as f:
+      with open(score_path, 'r', encoding='utf-8') as f:
         tok = f.read().strip().split(' ')
         best_step = int(tok[0])
         best_score = float(tok[1])
@@ -410,7 +415,7 @@ class Experiment(experiment.AbstractExperiment):
     if best_score is None or (score > best_score and global_step > best_step):
       best_score = score
 
-      with open(score_path, 'w') as f:
+      with open(score_path, 'w', encoding='utf-8') as f:
         f.write(f'{global_step} {best_score}')
 
       with open(outputs_path, 'wb') as f:
@@ -439,7 +444,7 @@ class Experiment(experiment.AbstractExperiment):
   def _build_eval_input(self):
     """Builds the evaluation input pipeline."""
     config_dataset = self.config.dataset
-    with open(config_dataset.dataset_path) as dataset_file:
+    with open(config_dataset.dataset_path, encoding='utf-8') as dataset_file:
       ds = dataloader.loader_tf(
           self.config.evaluation.batch_size,
           config_dataset,
@@ -621,6 +626,14 @@ class Experiment(experiment.AbstractExperiment):
 
       summary_batch, outputs_batch, model_log_batch = self._eval_batch(
           params, batch, rng)
+      
+      # if 'use_jit' in self.config.evaluation and self.config.evaluation.use_jit:
+      #   evaluator = jax.jit(self._eval_batch)
+      #   summary_batch, outputs_batch, model_log_batch = evaluator(
+      #       params, batch, rng)
+      # else:
+      #   summary_batch, outputs_batch, model_log_batch = self._eval_batch(
+      #       params, batch, rng)
 
       # Append batch values to dictionary
       for k, v in summary_batch.items():

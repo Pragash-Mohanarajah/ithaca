@@ -89,14 +89,14 @@ def get_config():
                   repeat_train=-1,
                   repeat_eval=10,
                   black_list=[
-                      # 2334, 10, 293931, 14, 293752, 15, 293753, 16, 11,
-                      # 294468, 229647, 12, 291324, 291317, 17, 232697, 293754,
-                      # 1682, 1675, 1676, 1677, 1678, 1679, 1680, 1681, 291118,
-                      # 291320, 291319, 292366, 34, 291960, 35, 32, 346490, 27,
-                      # 292187, 291318, 19, 18, 37, 291321, 292189, 293756, 42,
-                      # 46, 232710, 39, 40, 41, 291322, 293757, 293327, 28,
-                      # 292194, 293326, 21, 293755, 291319, 291117, 38, 291959,
-                      # 31, 232705
+                      2334, 10, 293931, 14, 293752, 15, 293753, 16, 11,
+                      294468, 229647, 12, 291324, 291317, 17, 232697, 293754,
+                      1682, 1675, 1676, 1677, 1678, 1679, 1680, 1681, 291118,
+                      291320, 291319, 292366, 34, 291960, 35, 32, 346490, 27,
+                      292187, 291318, 19, 18, 37, 291321, 292189, 293756, 42,
+                      46, 232710, 39, 40, 41, 291322, 293757, 293327, 28,
+                      292194, 293326, 21, 293755, 291319, 291117, 38, 291959,
+                      31, 232705
                   ],
                   white_list=[]),
               model=dict(
@@ -154,17 +154,18 @@ def get_config():
                   use_jit=True,
                   batch_size=1,
                   mode='valid',
-                  store_model_log=False,
+                  store_model_log=True,
                   store_model_log_steps=100,
               ),
           ),))
 
   # Training loop config.
-  config.training_steps = 1_000_000
+  config.training_steps = 1_000
   config.log_train_data_interval = 10
   config.save_checkpoint_interval = 300
+  config.save_initial_train_checkpoint = True
   config.best_model_eval_metric = 'score/eval'
-  config.checkpoint_dir = '/tmp/ithaca_checkpoints'
+  config.checkpoint_dir = '/tmp/checkpoints'
   config.train_checkpoint_all_hosts = False
 
   # Prevents accidentally setting keys that aren't recognized (e.g. in tests).
