@@ -397,6 +397,7 @@ class Experiment(experiment.AbstractExperiment):
     # Log outputs
     checkpoint_dir = jl_utils.get_checkpoint_dir(FLAGS.config,
                                                  jax.process_index())
+    # checkpoint_dir = os.path.join(os.getcwd(), 'checkpoints', jax.process_index())
     outputs_path = os.path.join(checkpoint_dir, 'best_outputs.pkl.bz2')
     score_path = os.path.join(checkpoint_dir, 'best_score.txt')
     model_log_path = os.path.join(checkpoint_dir, 'model_log')
@@ -599,6 +600,7 @@ class Experiment(experiment.AbstractExperiment):
     # Prepare directories for storing model log
     checkpoint_dir = jl_utils.get_checkpoint_dir(FLAGS.config,
                                                  jax.process_index())
+    # checkpoint_dir = os.path.join(os.getcwd(), 'checkpoints', jax.process_index())
     model_log_path = os.path.join(checkpoint_dir, 'model_log')
     if self.config.evaluation.store_model_log:
       if os.path.isdir(model_log_path):
@@ -689,4 +691,6 @@ class Experiment(experiment.AbstractExperiment):
 
 if __name__ == '__main__':
   flags.mark_flag_as_required('config')
+  # tf.config.experimental.set_visible_devices([], 'GPU')
+  # tf.config.experimental.set_visible_devices([], 'TPU')
   app.run(functools.partial(platform.main, Experiment))

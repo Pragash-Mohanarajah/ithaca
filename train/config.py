@@ -122,7 +122,7 @@ def get_config():
               ),
               loss=dict(
                   date=dict(
-                      enabled=True,
+                      enabled=False,
                       type='dist',
                       weight_dist=1.25,
                       weight_l1=0.,
@@ -131,7 +131,7 @@ def get_config():
                       step_end=0,
                   ),
                   region=dict(
-                      enabled=True,
+                      enabled=False,
                       weight=2.,
                       label_smoothing=0.1,
                       step_start=0,
@@ -151,11 +151,12 @@ def get_config():
                       step_end=0,
                   )),
               evaluation=dict(
-                  use_jit=True,
+                  use_jit=False,
                   batch_size=1,
+                  interval=100,
                   mode='valid',
                   store_model_log=True,
-                  store_model_log_steps=100,
+                  store_model_log_steps=0,
               ),
           ),))
 
@@ -167,6 +168,9 @@ def get_config():
   config.best_model_eval_metric = 'score/eval'
   config.checkpoint_dir = '/tmp/checkpoints'
   config.train_checkpoint_all_hosts = False
+  config.eval_initial_weights = True
+  config.one_off_evaluate = True
+  config.legacy_random_seed_behavior = True
 
   # Prevents accidentally setting keys that aren't recognized (e.g. in tests).
   config.lock()
