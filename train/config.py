@@ -151,12 +151,12 @@ def get_config():
                       step_end=0,
                   )),
               evaluation=dict(
-                  use_jit=False,
+                  use_jit=True,
                   batch_size=1,
                   interval=100,
                   mode='valid',
-                  store_model_log=True,
-                  store_model_log_steps=0,
+                  store_model_log=False,
+                  store_model_log_steps=10,
               ),
           ),))
 

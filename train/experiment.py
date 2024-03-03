@@ -145,6 +145,13 @@ class Experiment(experiment.AbstractExperiment):
     #   updater(self._params, self._opt_state, global_step, batch, rng))
 
     scalars = jl_utils.get_first(scalars)
+    
+    # global_step_value = jl_utils.get_first(global_step)
+    # if (global_step_value % self.config.evaluation.interval != 0 and
+    #     global_step_value != FLAGS.config.get('training_steps', 1) - 1):
+    #     eval_scalars = self.evaluate(global_step, rng)
+    #     scalars.update(eval_scalars)
+
     return scalars
 
   def _initialize_train(self, rng):
@@ -383,6 +390,7 @@ class Experiment(experiment.AbstractExperiment):
     """See base class."""
 
     if self._eval_input is None:
+      # self._initialize_train(rng)
       self._initialize_eval()
 
     global_step = np.array(jl_utils.get_first(global_step))
@@ -397,7 +405,7 @@ class Experiment(experiment.AbstractExperiment):
     # Log outputs
     checkpoint_dir = jl_utils.get_checkpoint_dir(FLAGS.config,
                                                  jax.process_index())
-    # checkpoint_dir = os.path.join(os.getcwd(), 'checkpoints', jax.process_index())
+    # checkpoint_dir = os.path.join(os.getcwd(), 'checkpoints', str(jax.process_index()))
     outputs_path = os.path.join(checkpoint_dir, 'best_outputs.pkl.bz2')
     score_path = os.path.join(checkpoint_dir, 'best_score.txt')
     model_log_path = os.path.join(checkpoint_dir, 'model_log')
@@ -600,7 +608,7 @@ class Experiment(experiment.AbstractExperiment):
     # Prepare directories for storing model log
     checkpoint_dir = jl_utils.get_checkpoint_dir(FLAGS.config,
                                                  jax.process_index())
-    # checkpoint_dir = os.path.join(os.getcwd(), 'checkpoints', jax.process_index())
+    # checkpoint_dir = os.path.join(os.getcwd(), 'checkpoints', str(jax.process_index()))
     model_log_path = os.path.join(checkpoint_dir, 'model_log')
     if self.config.evaluation.store_model_log:
       if os.path.isdir(model_log_path):
@@ -623,11 +631,14 @@ class Experiment(experiment.AbstractExperiment):
 
     # Converting to numpy here allows us to reset the generator
     for batch in self._eval_input:
+      # print(batch)
       # Make sure that the input has batch_dim=1
       assert batch['text_char'].shape[0] == 1
 
       summary_batch, outputs_batch, model_log_batch = self._eval_batch(
           params, batch, rng)
+      
+      # print(summary_batch)
       
       # if 'use_jit' in self.config.evaluation and self.config.evaluation.use_jit:
       #   evaluator = jax.jit(self._eval_batch)
@@ -642,6 +653,8 @@ class Experiment(experiment.AbstractExperiment):
         summary[k] = summary.get(k, 0) + v
       for k, v in outputs_batch.items():
         outputs.setdefault(k, []).append(v)
+      
+      # print(summary)
 
       total_num_sequences += self.config.evaluation.batch_size
 
